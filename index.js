@@ -37,6 +37,18 @@ app.get('/info', (req, res) => {
             <p>${new Date()}</p>`);
 });
 
+app.get('/api/contacts/:id', (request, response) => {
+  const id = Number(request.params.id);
+  const contact = contacts.find((contact) => contact.id === id);
+  if (contact) {
+    console.log('corresponding contact has been found');
+    response.json(contact);
+  } else {
+    console.log("contact with such id doesn't exist");
+    response.status(404).end();
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
