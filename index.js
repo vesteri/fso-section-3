@@ -77,8 +77,8 @@ app.post('/api/persons', (request, response) => {
     });
   }
 
-  const names = contacts.map((contact) => contact.name.toLowerCase);
-  if (names.includes(body.name.toLowerCase)) {
+  const names = contacts.map((contact) => contact.name.toLowerCase());
+  if (names.includes(body.name.toLowerCase())) {
     return response.status(400).json({
       error: 'this person is already in contacts',
     });
