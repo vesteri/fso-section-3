@@ -1,7 +1,10 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
 app.use(express.json());
+app.use(morgan('tiny'));
+morgan.token('body', (req) => JSON.stringify(req.body));
 
 let contacts = [
   {
@@ -67,7 +70,7 @@ const generateId = () => {
   return newId;
 };
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', morgan(':body'), (request, response) => {
   console.log('post request recieved');
   const body = request.body;
   console.log(body);
