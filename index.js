@@ -6,6 +6,9 @@ app.use(express.json());
 app.use(morgan('tiny'));
 morgan.token('body', (req) => JSON.stringify(req.body));
 
+const cors = require('cors');
+app.use(cors());
+
 let contacts = [
   {
     name: 'Arto Hellas',
