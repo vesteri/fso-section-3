@@ -103,7 +103,7 @@ app.post('/api/persons', morgan(':body'), (request, response) => {
   console.log(`${contact.name} added to contacts`);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
