@@ -7,6 +7,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('tiny'));
 morgan.token('body', (req) => JSON.stringify(req.body));
+app.use(express.static('build'));
 
 let contacts = [
   {
