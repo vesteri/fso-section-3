@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const app = express();
 const cors = require('cors');
+const Person = require('./models/person');
 
 app.use(cors());
 app.use(express.json());
@@ -9,45 +10,25 @@ app.use(morgan('tiny'));
 morgan.token('body', (req) => JSON.stringify(req.body));
 app.use(express.static('build'));
 
-let contacts = [
-  {
-    name: 'Arto Hellas',
-    number: '040-123456',
-    id: 1,
-  },
-  {
-    name: 'Ada Lovelace',
-    number: '39-44-5323523',
-    id: 2,
-  },
-  {
-    name: 'Dan Abramov',
-    number: '12-43-234345',
-    id: 3,
-  },
-  {
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122',
-    id: 4,
-  },
-];
-
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>');
 });
 
-app.get('/api/persons', (req, res) => {
-  res.json(contacts);
+app.get('/api/persons', (request, response) => {
+  Person.find({}).then((persons) => {
+    response.json(persons);
+    console.log(persons);
+  });
 });
 
 app.get('/info', (req, res) => {
-  res.send(`<p>Phonebook has info for ${contacts.length} people.</p>
+  res.send(`<p>Phonebook has info for ${Person.find({}).length} people.</p>
             <p>${new Date()}</p>`);
 });
 
 app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id);
-  const contact = contacts.find((contact) => contact.id === id);
+  const contact = Person.find((contact) => contact.id === id);
   if (contact) {
     console.log('corresponding contact has been found');
     response.json(contact);
@@ -58,20 +39,11 @@ app.get('/api/persons/:id', (request, response) => {
 });
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id);
-  contacts = contacts.filter((contact) => contact.id !== id);
+  const idToDel = Number(request.params.id);
+  Person.deleteOne({ id: idToDel });
 
   response.status(204).end();
 });
-
-const generateId = () => {
-  const ids = contacts.map((contact) => contact.id);
-  let newId = Math.floor(Math.random() * 10000);
-  while (ids.includes(newId)) {
-    newId = Math.floor(Math.random() * 10000);
-  }
-  return newId;
-};
 
 app.post('/api/persons', morgan(':body'), (request, response) => {
   console.log('post request recieved');
@@ -83,24 +55,23 @@ app.post('/api/persons', morgan(':body'), (request, response) => {
     });
   }
 
-  const names = contacts.map((contact) => contact.name.toLowerCase());
+  /*const names = contacts.map((contact) => contact.name.toLowerCase());
   if (names.includes(body.name.toLowerCase())) {
     return response.status(400).json({
       error: 'this person is already in contacts',
     });
-  }
+  }*/
 
-  const contact = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  };
-  console.log('contact data validated');
-
-  contacts = [...contacts, contact];
-
-  response.json(contact);
-  console.log(`${contact.name} added to contacts`);
+    id: body.id,
+  });
+  console.log('adding new contact');
+  person.save().then((result) => {
+    console.log(`added ${person.name} number ${person.number} to contacts`);
+  });
+  response.json(person);
 });
 
 const PORT = process.env.PORT || 3001;
