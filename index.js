@@ -29,20 +29,18 @@ app.get('/info', (req, res) => {
 });
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id);
-  const contact = Person.find((contact) => contact.id === id);
-  if (contact) {
+  const idToFind = request.params.id;
+  Person.findById(idToFind).then((person) => {
     console.log('corresponding contact has been found');
-    response.json(contact);
-  } else {
-    console.log("contact with such id doesn't exist");
-    response.status(404).end();
-  }
+    response.json(person);
+  });
+  //console.log("contact with such id doesn't exist");
+  //response.status(404).end();
 });
 
 app.delete('/api/persons/:id', (request, response) => {
   Person.findByIdAndRemove(request.params.id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end();
     })
     .catch((error) => next(error));
@@ -51,19 +49,20 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons', morgan(':body'), (request, response) => {
   console.log('post request recieved');
   const body = request.body;
-  console.log(body);
   if (!body.name || !body.number) {
     return response.status(400).json({
       error: 'name and/or number missing',
     });
   }
 
-  /*const names = contacts.map((contact) => contact.name.toLowerCase());
+  /*
+  const names = contacts.map((contact) => contact.name.toLowerCase());
   if (names.includes(body.name.toLowerCase())) {
     return response.status(400).json({
       error: 'this person is already in contacts',
     });
-  }*/
+  }
+*/
 
   const person = new Person({
     name: body.name,
@@ -75,6 +74,15 @@ app.post('/api/persons', morgan(':body'), (request, response) => {
     console.log(`added ${person.name} number ${person.number} to contacts`);
   });
   response.json(person);
+});
+
+app.patch('/api/persons/:id', (request, response) => {
+  console.log('patch request recieved');
+  Person.findByIdAndUpdate(request.params.id, { number: request.body.number })
+    .then(() => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 const PORT = process.env.PORT || 3001;
