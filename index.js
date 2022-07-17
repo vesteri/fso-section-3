@@ -17,13 +17,15 @@ app.get('/', (req, res) => {
 app.get('/api/persons', (request, response) => {
   Person.find({}).then((persons) => {
     response.json(persons);
-    console.log(persons);
+    console.log('.............................');
   });
 });
 
 app.get('/info', (req, res) => {
-  res.send(`<p>Phonebook has info for ${Person.find({}).length} people.</p>
-            <p>${new Date()}</p>`);
+  Person.find({}).then((persons) => {
+    res.send(`<p>Phonebook has info for ${persons.length} people.</p>
+              <p>${new Date()}</p>`);
+  });
 });
 
 app.get('/api/persons/:id', (request, response) => {
@@ -39,10 +41,11 @@ app.get('/api/persons/:id', (request, response) => {
 });
 
 app.delete('/api/persons/:id', (request, response) => {
-  const idToDel = Number(request.params.id);
-  Person.deleteOne({ id: idToDel });
-
-  response.status(204).end();
+  Person.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post('/api/persons', morgan(':body'), (request, response) => {
