@@ -70,10 +70,18 @@ app.post('/api/persons', morgan(':body'), (request, response) => {
     id: body.id,
   });
   console.log('adding new contact');
-  person.save().then((result) => {
-    console.log(`added ${person.name} number ${person.number} to contacts`);
-  });
-  response.json(person);
+  person
+    .save()
+    .then((result) => {
+      console.log(`added ${person.name} number ${person.number} to contacts`);
+      response.json(person);
+    })
+    .catch((error) => {
+      console.log(error);
+      response.status(400).json({
+        error: error,
+      });
+    });
 });
 
 app.patch('/api/persons/:id', (request, response) => {
