@@ -4,11 +4,11 @@ const app = express();
 const cors = require('cors');
 const Person = require('./models/person');
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
+app.use(express.static('build'));
 app.use(morgan('tiny'));
 morgan.token('body', (req) => JSON.stringify(req.body));
-app.use(express.static('build'));
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>');
@@ -28,14 +28,19 @@ app.get('/info', (req, res) => {
   });
 });
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const idToFind = request.params.id;
-  Person.findById(idToFind).then((person) => {
-    console.log('corresponding contact has been found');
-    response.json(person);
-  });
-  //console.log("contact with such id doesn't exist");
-  //response.status(404).end();
+  Person.findById(idToFind)
+    .then((person) => {
+      if (person) {
+        console.log('corresponding contact has been found');
+        response.json(person);
+      } else {
+        console.log("contact with such id doesn't exist");
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -92,6 +97,24 @@ app.patch('/api/persons/:id', (request, response) => {
     })
     .catch((error) => next(error));
 });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
