@@ -1,11 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const param = process.argv;
 if (param.length !== 3 && param.length !== 5) {
-  console.log(
-    'type "node mongo.js [password]" to list all contacts n\
-  or "node mongo.js [password] [name] [number]" to add a contact'
-  );
   process.exit(1);
 }
 
@@ -21,10 +17,10 @@ const personSchema = new mongoose.Schema({
   id: Number,
 });
 
-const Person = mongoose.model('Person', personSchema);
+const Person = mongoose.model("Person", personSchema);
 
 if (process.argv.length == 3) {
-  console.log('phonebook:');
+  console.log("phonebook:");
   Person.find({}).then((contacts) => {
     contacts.forEach((person) => {
       console.log(person.name, person.number);
@@ -38,7 +34,7 @@ if (process.argv.length == 3) {
     id: Math.floor(Math.random() * 10000),
   });
 
-  person.save().then((result) => {
+  person.save().then(() => {
     console.log(`added ${person.name} number ${person.number} to phonebook`);
     mongoose.connection.close();
   });
